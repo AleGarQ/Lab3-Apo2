@@ -1,14 +1,39 @@
 package model;
 
+import java.io.*;
 import java.util.*;
 import exceptions.RepeatedName;
 import exceptions.NameNotFound;
 
-public class Controller {
+public class Controller implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private ArrayList<Clan> clans;
+	private String files;
 
-	public Controller() {
+	public Controller(String files) {
 		clans = new ArrayList<Clan>();
+		this.files = files;
+		deserialize();
+	}
+
+	private void deserialize() {
+		ArrayList<Clan> clans;
+		
+		try {
+			File newFile = new File(files);
+				
+			FileInputStream fi = new FileInputStream(newFile);
+			ObjectInputStream oi = new ObjectInputStream(fi);
+				
+			clans = (ArrayList<Clan>) oi.readObject();
+			setClans(clans);
+				
+			oi.close();
+		}catch(IOException e) {
+			e.getMessage();
+		}catch(ClassNotFoundException e) {
+			e.getMessage();
+		}
 	}
 
 	public ArrayList<Clan> getClans() {
@@ -112,29 +137,123 @@ public class Controller {
 		}
 	}
 
-	public void sortClansByName() {
+	public void sortClans() {
 		Clan aux = null;
 		
 		for (int i = 1; i < clans.size(); i++) {
-			for(int j = 0; j < clans.size()-i; j++) {
-				Clan lesser = clans.get(j);
-				if(clans.get(j).compare(lesser, clans.get(j+1)) > 0) {
-					aux = lesser;
-					lesser = clans.get(j+1);
-					clans.set(j, lesser);
-					clans.set(j+1, aux);
-				}
+			aux = clans.get(i);
+			int j = i - 1;
+			while(j >= 0 && aux.compare(aux, clans.get(j)) < 0) {
+					clans.set(j+1, clans.get(j));
+					j--;
 			}
+			clans.set(j+1, aux);
 		}
 	}
 	
-	public String showSortedInfo() {		
+	public String showClansSortedInfo() {		
 		String msg = "";
 		
 		for(int i = 0; i < clans.size();i++) {
-			msg = "\n " + clans.get(i).toString();
+			msg += "\n " + clans.get(i).toString();
+			
 		}
 		
 		return msg;
 	}
+
+	public void ninjasSorted(String clanName) throws NameNotFound {
+		boolean found = false;
+	
+		for(int i = 0; i < clans.size(); i++) {
+			if(clans.get(i).getName().equalsIgnoreCase(clanName)) {
+				clans.get(i).sortNinjas();
+				found = true;
+			}
+		}
+			
+		if(found == false) {
+			throw new NameNotFound("EL CLAN NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
+		}
+	}
+
+	public String showInfo(String clanName) throws NameNotFound {
+		String msg = "";
+		boolean found = false;
+			
+		for(int i = 0; i < clans.size() && !found; i++) {	
+			if(clans.get(i).getName().equalsIgnoreCase(clanName)) {
+				msg += " " +clans.get(i).showSortedInfo();
+				found = true;
+			}
+		}
+		if(found == false) {
+			throw new NameNotFound("EL CLAN NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
+		}
+		return msg;
+	}
+
+	public void serialize() {
+		try {
+			File newFile = new File(files);
+			
+			FileOutputStream fo = new FileOutputStream(newFile);
+			ObjectOutputStream oo = new ObjectOutputStream(fo);
+			
+			oo.writeObject(clans);
+			oo.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String findNinja(String clanName, String ninjaName) throws NameNotFound {
+		String msg = "";
+		boolean found = false;
+		for(int i = 0; i < clans.size() && !found; i++) {
+			if(clans.get(i).getName().equalsIgnoreCase(clanName)) {
+				msg += clans.get(i).findNinja(ninjaName);
+				found = true;
+			}
+		}
+		
+		if(found == false) {
+			throw new NameNotFound("EL CLAN NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
+		}
+		
+		return msg;
+	}
+
+	public void techniquesSorted(String clanName, String ninjaName) throws NameNotFound {
+		boolean found = false;
+		
+		for(int i = 0; i < clans.size() && !found; i++) {
+			if(clans.get(i).getName().equalsIgnoreCase(clanName)) {
+				clans.get(i).sortTechniques(ninjaName); 
+				found = true;
+			}
+		}
+		if(found == false) {
+			throw new NameNotFound("EL CLAN NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
+		}
+	}
+
+	public String showTechniquesInfo(String clanName, String ninjaName) throws NameNotFound {
+		String msg = "";
+		boolean found = false;
+		for(int i = 0; i < clans.size() && !found; i++) {
+			if(clans.get(i).getName().equalsIgnoreCase(clanName)) {
+				msg += clans.get(i).showTechniquesInfo(ninjaName);
+				found = true;
+			}
+		}
+		
+		if(found == false) {
+			throw new NameNotFound("EL CLAN NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
+		}
+		
+		return msg;
+	}
+
 }

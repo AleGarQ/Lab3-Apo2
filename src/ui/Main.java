@@ -15,7 +15,7 @@ public class Main {
 	}
 	
 	public Main() {
-		system = new Controller();
+		system = new Controller("resources/Serializable.dat");
 		scan = new Scanner(System.in);
 	}
 	
@@ -124,26 +124,54 @@ public class Main {
 					}
 				break;
 				case 7:
-					system.sortClansByName();
-					System.out.println(system.showSortedInfo());
+					system.sortClans();
+					System.out.println(system.showClansSortedInfo());
 				break;
 				case 8:
+					System.out.println("Digite el nombre del clan");
+					clanName = scan.nextLine();
 					
+					try {
+						system.ninjasSorted(clanName);
+						System.out.println(system.showInfo(clanName));
+					}catch(NameNotFound e) {
+						System.out.println(e.getMessage());
+					}
 				break;
 				case 9:
+					System.out.println("Digite el nombre del clan");
+					clanName = scan.nextLine();
+					System.out.println("Digite el nombre del personaje");
+					ninjaName = scan.nextLine();
 					
+					try {
+						system.techniquesSorted(clanName, ninjaName); 
+						System.out.println(system.showTechniquesInfo(clanName, ninjaName));
+					}catch(NameNotFound e) {
+						System.out.println(e.getMessage());
+					}
 				break;
 				case 10:
+					System.out.println("Digite el nombre del clan");
+					clanName = scan.nextLine();
 					
+					System.out.println("Digite el nombre del ninja que desea buscar");
+					ninjaName = scan.nextLine();
+					
+					try {
+						Long a = System.nanoTime();
+						System.out.println(system.findNinja(clanName, ninjaName));
+						Long b = System.nanoTime();
+						
+						System.out.println("El tiempo que tarda el programa en realizar la busqueda es:" + ((b-a)*1e+9) + " segs");
+					}catch(NameNotFound e) {
+						System.out.println(e.getMessage());
+					}
 				break;
 				case 11:
-					
-				break;
-				case 12:
-					
-				break;
-				case 13:
 					System.out.println("Gracias por usar nuestro programa. Regrese pronto");
+					system.serialize();
+					
 				break;
 				}
 			}catch(InputMismatchException e){
@@ -151,7 +179,7 @@ public class Main {
 				scan.nextLine();
 			}
 			
-		}while(userSelection != 13);
+		}while(userSelection != 11);
 	}
 	
 	public void options() {
@@ -167,10 +195,8 @@ public class Main {
 		System.out.println("7. Mostrar los clanes");
 		System.out.println("8. Mostrar los personajes por clan");
 		System.out.println("9. Mostrar las tecnicas de un personaje");
-		System.out.println("10. Cambiar atributos de un clan");		
-		System.out.println("11. Cambiar atributos de un personaje");
-		System.out.println("12. Cambiar atributos de una tecnica");
-		System.out.println("13. Salir");
+		System.out.println("10. Buscar un personaje guardado en el sistema");
+		System.out.println("11. Guardar y Salir");
 		System.out.println("**********************************************************************************************************************************************");
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 	}

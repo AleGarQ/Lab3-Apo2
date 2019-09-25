@@ -1,9 +1,11 @@
 package model;
 
+import java.io.*;
 import exceptions.NameNotFound;
 import exceptions.RepeatedName;
 
-public class Ninja {
+public class Ninja implements Serializable, Comparable<Ninja>{
+	private static final long serialVersionUID = 1L;
 	private String name;
 	private String personality;
 	private String builtDate;
@@ -22,6 +24,7 @@ public class Ninja {
 		this.firstTechnique = firstTechnique;
 		this.next = next;
 		this.previous = previous;
+		this.power = setRealPower();
 	}
 
 	public String getName() {
@@ -53,7 +56,7 @@ public class Ninja {
 	}
 
 	public void setPower(double power) {
-		this.power = score * firstTechnique.getFactor();
+		this.power = power;
 	}
 	
 	public double getScore() {
@@ -86,6 +89,10 @@ public class Ninja {
 
 	public void setPrevious(Ninja previous) {
 		this.previous = previous;
+	}
+	
+	public double setRealPower() {
+		return power = (getScore() * firstTechnique.getFactor());
 	}
 	
 	public void addTechnique(Technique nwTechnique) throws RepeatedName{
@@ -137,6 +144,150 @@ public class Ninja {
 		if(found == false) {
 			throw new NameNotFound("EL PERSONAJE NO HA SIDO ENCONTRADO, REVISE SI EL NOMBRE DIGITADO ES CORRECTO");
 		}		
+	}
+	
+	public String toString() {
+		String msg = "";
+		
+		msg += "El nombre del personaje es: " + getName() + " || ";
+		msg += "La personalidad del personaje es: " + getPersonality() + " || ";
+		msg += "La fecha de creacion del personaje es: " + getBuiltDate() + " || ";
+		msg += "El poder del personaje es: " + getPower() + " || ";
+		msg += "El puntaje del personaje es: " + getScore() + " || ";
+		
+		return msg;
+	}
+
+	@Override
+	public int compareTo(Ninja aux) {
+		return getName().compareToIgnoreCase(aux.getName());
+	}
+
+	public void sortTechniques() throws NameNotFound {
+		Technique higher = null;
+		int pos = 0;
+
+		for(int i = 0; i < techniqueLenght(); i++) {
+			Technique lesser = elementInTechnique(i);
+			for(int j = i + 1; j < techniqueLenght(); j++) {
+				higher = elementInTechnique(j);
+				
+				if(higher.compareTo(lesser) < 0) {
+					lesser = higher;	 
+					pos = j;
+			 }
+		 }
+			Technique aux = new Technique(lesser.getName(), lesser.getFactor(), null);
+			Technique aux2 = new Technique(elementInTechnique(i).getName(), elementInTechnique(i).getFactor(), null);
+			
+			if(elementInTechnique(i) == firstTechnique) {
+				deleteTechnique(aux2.getName());
+				addAtStart(aux);
+				modifyPos(pos, aux2);
+			}else {
+				insert(lesser.getName(), aux2);
+				deleteTechnique(lesser.getName());
+				modifyPos(i, lesser);
+			}
+	 }
+	}
+
+	private void insert(String name, Technique aux2) {
+		Technique aux = firstTechnique;
+		Technique auxPrev = null;
+		boolean inserted = false;
+		
+		while(aux != null && !inserted) {
+			if(aux.getName().compareTo(name) == 0) {
+				auxPrev = aux;
+				inserted = true;
+			}else {
+				aux = aux.getNext();
+			}
+		}
+		
+		Technique auxNext = auxPrev.getNext();
+		auxPrev.setNext(aux2);
+		aux2.setNext(auxNext);
+	}
+
+	private void modifyPos(int pos, Technique aux2) {
+		Technique aux;
+		Technique auxPrev;
+		Technique auxNext;
+		
+		if(pos == 0) {
+			aux = firstTechnique;
+			auxPrev = null;
+			auxNext = aux.getNext();
+			firstTechnique = aux2;
+			aux2.setNext(auxNext);
+		}else if(pos != techniqueLenght()-1) {
+			aux = elementInTechnique(pos);
+			auxPrev = elementInTechnique(pos - 1);
+			auxNext = aux.getNext();
+			
+			auxPrev.setNext(aux2);
+			aux2.setNext(auxNext);
+		}else if(pos == techniqueLenght() -1) {
+			auxNext = null;
+			aux = elementInTechnique(pos);
+			auxPrev = elementInTechnique(pos - 1);
+			auxPrev.setNext(aux2);
+			aux2.setNext(auxNext);
+		}
+	}
+
+	private void addAtStart(Technique tec) {
+		Technique aux = firstTechnique;
+		
+		if(firstTechnique == null) {
+			firstTechnique = tec;
+		}else {
+			tec.setNext(aux);
+			firstTechnique = tec;
+		}
+	}
+
+	private Technique elementInTechnique(int pos) {
+		Technique aux = firstTechnique;
+		
+		if(pos != 0) {
+			for(int i = 0; i < pos; i++) {
+				aux = aux.getNext();
+			}
+		}else {
+			aux = firstTechnique;
+		}
+		return aux;
+	}
+
+	private int techniqueLenght() {
+		int lenght = 0;
+		Technique aux = firstTechnique;
+		
+		while(aux != null) {
+			lenght++;
+			aux = aux.getNext();
+		}
+		
+		return lenght;
+	}
+
+	public String showTechniquesInfo() {
+		String msg = "";
+		Technique aux = firstTechnique;
+		
+		if(aux == null) {
+			msg = "No tiene tecnicas";
+		}else {
+			while(aux != null) {
+				
+				msg += aux.toString() + "\n";
+				aux = aux.getNext();	
+			}
+		}
+		return msg;
 	}
 	
 }
